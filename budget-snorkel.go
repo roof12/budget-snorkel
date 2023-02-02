@@ -17,6 +17,10 @@ func handle(line string) {
 		fmt.Println("id name Budget Snorkel")
 		fmt.Println("id author Scott Lewis")
 		fmt.Println("uciok")
+	case "isready":
+		fmt.Println("readyok")
+	case "quit":
+		os.Exit(0)
 	default:
 	}
 }
