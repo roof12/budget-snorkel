@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/notnil/chess"
 )
 
 const version = "0.0.1"
@@ -19,6 +21,11 @@ func handle(line string) {
 		fmt.Println("uciok")
 	case "isready":
 		fmt.Println("readyok")
+	case "position":
+		game := chess.NewGame(chess.UseNotation(chess.UCINotation{}))
+		game.MoveStr("e2e4")
+		game.MoveStr("e7e5")
+		fmt.Println(game.Position().Board().Draw())
 	case "quit":
 		os.Exit(0)
 	default:
@@ -28,10 +35,10 @@ func handle(line string) {
 func main() {
 	fmt.Printf("Budget Snorkel v%s\n", version)
 	scanner := bufio.NewScanner(os.Stdin)
-    for scanner.Scan() {
+	for scanner.Scan() {
 		handle(scanner.Text())
 	}
-    if err := scanner.Err(); err != nil {
-        fmt.Fprintln(os.Stderr, "reading standard input:", err)
-    }
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	}
 }
