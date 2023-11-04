@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/notnil/chess"
 )
@@ -15,7 +17,8 @@ var dbg = false
 
 func find_move(game *chess.Game) *chess.Move {
 	moves := game.ValidMoves()
-	return moves[0]
+	index := rand.Intn(len(moves))
+	return moves[index]
 }
 
 func handle(line string, game *chess.Game) *chess.Game {
@@ -84,6 +87,8 @@ func handle(line string, game *chess.Game) *chess.Game {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	fmt.Printf("Budget Snorkel v%s\n", version)
 	game := chess.NewGame(chess.UseNotation(chess.UCINotation{}))
 	scanner := bufio.NewScanner(os.Stdin)
