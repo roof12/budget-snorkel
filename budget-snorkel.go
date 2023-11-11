@@ -39,25 +39,39 @@ func evaluate(game chess.Game, move *chess.Move) int16 {
 	return int16(total * 100)
 }
 
-func findMove(game chess.Game) (*chess.Move, int16) {
-	blackToMove := game.Position().Turn() == chess.Black
-	var maxEval int16 = math.MinInt16
-	bestMoves := []*chess.Move{}
+func findMove(game chess.Game, depth int8) (*chess.Move, int16) {
 	moves := game.ValidMoves()
+	if len(moves) == 0 {
+		return nil, 0
+	}
+
+	blackToMove := game.Position().Turn() == chess.Black
+	var bestEval int16 = math.MinInt16
+	bestMoves := []*chess.Move{}
 	for _, move := range moves {
 		evaluation := evaluate(game, move)
-		if blackToMove {
-			evaluation *= -1
+
+		if depth > 0 {
+			newGame := game.Clone()
+			newGame.Move(move)
+			newMove, newEval := findMove(*newGame, depth-1)
+			if newMove != nil {
+				evaluation = newEval
+			}
 		}
 
-		if evaluation > maxEval {
-			maxEval = evaluation
+		if (len(bestMoves) == 0) ||
+			(blackToMove && evaluation < bestEval) ||
+			(!blackToMove && evaluation > bestEval) {
+			bestEval = evaluation
 			bestMoves = []*chess.Move{move}
-		} else if evaluation == maxEval {
+		} else if evaluation == bestEval {
 			bestMoves = append(bestMoves, move)
 		}
 	}
-	return bestMoves[rand.Intn(len(bestMoves))], maxEval
+
+	randInt := rand.Intn(len(bestMoves))
+	return bestMoves[randInt], bestEval
 }
 
 func handle(line string, game *chess.Game) *chess.Game {
@@ -115,9 +129,13 @@ func handle(line string, game *chess.Game) *chess.Game {
 		fmt.Println(game.Position().Board().Draw())
 
 	case "go":
-		move, eval := findMove(*game)
+		move, eval := findMove(*game, 1)
 		fmt.Printf("info score cp %d\n", int(eval))
-		fmt.Printf("bestmove %s\n", move.String())
+		if move == nil {
+			fmt.Println("bestmove (none)")
+		} else {
+			fmt.Printf("bestmove %s\n", move.String())
+		}
 
 	default:
 		// ignore
