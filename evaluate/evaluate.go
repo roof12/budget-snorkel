@@ -27,8 +27,26 @@ func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 	game.Move(move)
 
 	total := 0.0
-	whiteSquares := []chess.Square{chess.D2, chess.E2}
-	blackSquares := []chess.Square{chess.D7, chess.E7}
+	whiteSquares := []chess.Square{
+		chess.A1,
+		chess.B1,
+		chess.C1,
+		chess.D1,
+		chess.E1,
+		chess.F1,
+		chess.G1,
+		chess.H1,
+	}
+	blackSquares := []chess.Square{
+		chess.A8,
+		chess.B8,
+		chess.C8,
+		chess.D8,
+		chess.E8,
+		chess.F8,
+		chess.G8,
+		chess.H8,
+	}
 
 	squareMap := game.Position().Board().SquareMap()
 	for _, square := range whiteSquares {
