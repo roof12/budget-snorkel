@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"roof12/budget-snorkel/evaluate"
 	"strings"
 	"time"
 
@@ -14,30 +15,7 @@ import (
 
 const version = "0.0.2"
 
-var pieceValues = map[chess.PieceType]float64{
-	chess.NoPieceType: 0,
-	chess.King:        1000,
-	chess.Queen:       9,
-	chess.Rook:        5,
-	chess.Bishop:      3.2,
-	chess.Knight:      3,
-	chess.Pawn:        1,
-}
-
 var dbg = false
-
-func evaluate(game chess.Game, move *chess.Move) int16 {
-	total := 0.0
-	game.Move(move)
-	for _, piece := range game.Position().Board().SquareMap() {
-		if piece.Color() == chess.White {
-			total += pieceValues[piece.Type()]
-		} else {
-			total -= pieceValues[piece.Type()]
-		}
-	}
-	return int16(total * 100)
-}
 
 func findMove(game chess.Game, depth int8) (*chess.Move, int16) {
 	moves := game.ValidMoves()
@@ -49,7 +27,7 @@ func findMove(game chess.Game, depth int8) (*chess.Move, int16) {
 	var bestEval int16 = math.MinInt16
 	bestMoves := []*chess.Move{}
 	for _, move := range moves {
-		evaluation := evaluate(game, move)
+		evaluation := evaluate.Evaluate(game, move)
 
 		if depth > 0 {
 			newGame := game.Clone()
