@@ -1,6 +1,8 @@
 package evaluate
 
 import (
+	"fmt"
+
 	"github.com/notnil/chess"
 )
 
@@ -15,8 +17,33 @@ var pieceValues = map[chess.PieceType]float64{
 }
 
 func Evaluate(game chess.Game, move *chess.Move) int16 {
-	return int16((evaluatePosition(game, move) +
-		evaluateOpeningDevelopment(game, move)) * 100)
+	return (100 * int16(
+		evaluatePosition(game, move)+
+			evaluateOpeningDevelopment(game, move)+
+			evaluateCastling(game, move)))
+}
+
+func evaluateCastling(game chess.Game, move *chess.Move) float64 {
+	castleCount := 0
+	total := 0.0
+	game.Move(move)
+
+	for _, mh := range game.MoveHistory() {
+		if mh.Move.HasTag(chess.KingSideCastle) || mh.Move.HasTag(chess.QueenSideCastle) {
+			if mh.PrePosition.Turn() == chess.White {
+				total += 1.0
+				fmt.Println("White has castled")
+			} else {
+				total -= 1.0
+				fmt.Println("Black has castled")
+			}
+			castleCount += 1
+			if castleCount == 2 {
+				break
+			}
+		}
+	}
+	return total
 }
 
 func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
