@@ -17,10 +17,9 @@ var pieceValues = map[chess.PieceType]float64{
 }
 
 func Evaluate(game chess.Game, move *chess.Move) int16 {
-	return (100 * int16(
-		evaluatePosition(game, move)+
-			evaluateOpeningDevelopment(game, move)+
-			evaluateCastling(game, move)))
+	return (int16(100 * (evaluatePosition(game, move) +
+		evaluateOpeningDevelopment(game, move) +
+		evaluateCastling(game, move))))
 }
 
 func evaluateCastling(game chess.Game, move *chess.Move) float64 {
@@ -43,11 +42,13 @@ func evaluateCastling(game chess.Game, move *chess.Move) float64 {
 			}
 		}
 	}
+	fmt.Println("evaluateCastling", total)
 	return total
 }
 
 func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 	if len(game.Moves()) > 30 {
+		fmt.Println("opening move ct", len(game.Moves()))
 		return 0.0
 	}
 
@@ -55,6 +56,8 @@ func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 
 	total := 0.0
 	whiteSquares := []chess.Square{
+		chess.D2,
+		chess.E2,
 		chess.A1,
 		chess.B1,
 		chess.C1,
@@ -65,6 +68,8 @@ func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 		chess.H1,
 	}
 	blackSquares := []chess.Square{
+		chess.D7,
+		chess.E7,
 		chess.A8,
 		chess.B8,
 		chess.C8,
@@ -78,14 +83,17 @@ func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 	squareMap := game.Position().Board().SquareMap()
 	for _, square := range whiteSquares {
 		if squareMap[square].Type() == chess.NoPieceType {
+			fmt.Println("white developed", square)
 			total += 0.05
 		}
 	}
 	for _, square := range blackSquares {
 		if squareMap[square].Type() == chess.NoPieceType {
+			fmt.Println("black developed", square)
 			total -= 0.05
 		}
 	}
+	fmt.Println("evaluateOpeningDevelopment", total)
 	return total
 }
 
@@ -99,5 +107,6 @@ func evaluatePosition(game chess.Game, move *chess.Move) float64 {
 			total -= pieceValues[piece.Type()]
 		}
 	}
+	fmt.Println("evaluatePosition", total)
 	return total
 }
