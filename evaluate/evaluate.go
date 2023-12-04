@@ -6,7 +6,14 @@ import (
 	"github.com/notnil/chess"
 )
 
-var pieceValues = map[chess.PieceType]float64{
+type Delta float64
+
+const (
+	Casteled  Delta = 1.0
+	Developed Delta = 0.05
+)
+
+var pieceValues = map[chess.PieceType]Delta{
 	chess.NoPieceType: 0,
 	chess.King:        1000,
 	chess.Queen:       9,
@@ -22,18 +29,18 @@ func Evaluate(game chess.Game, move *chess.Move) int16 {
 		evaluateCastling(game, move))))
 }
 
-func evaluateCastling(game chess.Game, move *chess.Move) float64 {
+func evaluateCastling(game chess.Game, move *chess.Move) Delta {
 	castleCount := 0
-	total := 0.0
+	var total Delta = 0.0
 	game.Move(move)
 
 	for _, mh := range game.MoveHistory() {
 		if mh.Move.HasTag(chess.KingSideCastle) || mh.Move.HasTag(chess.QueenSideCastle) {
 			if mh.PrePosition.Turn() == chess.White {
-				total += 1.0
+				total += Casteled
 				fmt.Println("White has castled")
 			} else {
-				total -= 1.0
+				total -= Casteled
 				fmt.Println("Black has castled")
 			}
 			castleCount += 1
@@ -46,7 +53,7 @@ func evaluateCastling(game chess.Game, move *chess.Move) float64 {
 	return total
 }
 
-func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
+func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) Delta {
 	if len(game.Moves()) > 30 {
 		fmt.Println("opening move ct", len(game.Moves()))
 		return 0.0
@@ -54,7 +61,7 @@ func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 
 	game.Move(move)
 
-	total := 0.0
+	var total Delta = 0.0
 	whiteSquares := []chess.Square{
 		chess.D2,
 		chess.E2,
@@ -84,21 +91,21 @@ func evaluateOpeningDevelopment(game chess.Game, move *chess.Move) float64 {
 	for _, square := range whiteSquares {
 		if squareMap[square].Type() == chess.NoPieceType {
 			fmt.Println("white developed", square)
-			total += 0.05
+			total += Developed
 		}
 	}
 	for _, square := range blackSquares {
 		if squareMap[square].Type() == chess.NoPieceType {
 			fmt.Println("black developed", square)
-			total -= 0.05
+			total -= Developed
 		}
 	}
 	fmt.Println("evaluateOpeningDevelopment", total)
 	return total
 }
 
-func evaluatePosition(game chess.Game, move *chess.Move) float64 {
-	total := 0.0
+func evaluatePosition(game chess.Game, move *chess.Move) Delta {
+	var total Delta = 0.0
 	game.Move(move)
 	for _, piece := range game.Position().Board().SquareMap() {
 		if piece.Color() == chess.White {
